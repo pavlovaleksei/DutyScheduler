@@ -1,5 +1,5 @@
-# Electron & Vue.js
-> A example application to Electron & Vue.js
+# Duty Schedule
+> Sample schedule application to Electron Js
 
 ### Usage
 
@@ -15,4 +15,4 @@ $ npm run dev
 $ npm run build
 ```
 ## Author
-<small>Pavlov Aleksei</small>
+<small><i>Pavlov Aleksei</i></small>

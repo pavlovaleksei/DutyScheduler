@@ -1,7 +1,7 @@
 {
   "name": "DutyScheduler",
   "version": "1.0.0",
-  "description": "A example Electron & VueJs application",
+  "description": "Duty schedule for organizations",
   "author": "Pavlov Aleksei",
   "license": "MIT",
   "private": true,

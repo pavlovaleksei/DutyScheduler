@@ -1,14 +1,14 @@
 <template>
   <div>
     <h1>{{ msg }}</h1>
-    <clock/>
-    <PcConf/>
+    <Scheduler/>
+    <About/>
   </div>
 </template>
 
 <script>
-  import Clock from './components/Clock.vue'
-  import PcConf from './components/PcConfiguration.vue'
+  import Scheduler from './components/Scheduler.vue'
+  import About from './components/About.vue'
 
   export default {
     data () {
@@ -17,7 +17,7 @@
       }
     },
     components: {
-      Clock, PcConf
+      Scheduler, About
     }
   }
 </script>
