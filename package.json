@@ -8,7 +8,7 @@
   "main": "main.js",
   "scripts": {
     "dev-server": "cross-env NODE_ENV=development webpack-dev-server --inline --hot --quiet --port 3000",
-    "dev": "cross-env NODE_ENV=development electron ./",
+    "dev": "cross-env NODE_ENV=development electron ./ --icon=assets/app.ico",
     "build": "cross-env NODE_ENV=production webpack --mode production --progress --profile --colors",
     "start": "cross-env NODE_ENV=production electron ./",
     "package": "npm run build; npm run package-osx; npm run package-win; npm run package-linux;",
