@@ -3,3 +3,9 @@ node_modules
 npm-debug.log
 dist
 package
+idea
+.idea
+.idea/*
+.idea/.gitignore
+.idea/DutyScheduler.iml
+package-lock.json
