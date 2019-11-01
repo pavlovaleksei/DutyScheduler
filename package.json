@@ -22,6 +22,7 @@
     "bootstrap-vue": "^2.0.4",
     "dadata-suggestions": "^1.1.0",
     "electron": "^7.0.0",
+    "jspdf": "^1.5.3",
     "portal-vue": "^2.1.6",
     "vue": "^2.6.10",
     "vue-router": "^3.0.1",

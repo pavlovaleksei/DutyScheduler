@@ -1,6 +1,8 @@
 const electron = require('electron')
 
+
 const app = electron.app
+
 
 const BrowserWindow = electron.BrowserWindow
 
@@ -30,10 +32,17 @@ function createWindow () {
     mainWindow.loadURL(`file://${__dirname}/index.html`)
   }
 
+
+
   // Open the DevTools.
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools()
   }
+
+  // if (process.env.NODE_ENV === 'development') {
+  //   const pdfDoc = require('jspdf')
+  //   this.window.$pdfDoc = 'asdasd';
+  // }
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

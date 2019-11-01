@@ -12,6 +12,44 @@
     <div>
       <b-table striped bordered small :items="scheduleData.data" :fields="scheduleData.fields"></b-table>
     </div>
+    <div v-if="isTablesShow">
+      <div style="text-align: center">Аналитика занятости сотрудников</div>
+      <div>
+        <table style="text-align: center" border="1" align="center" width="90%">
+          <thead>
+            <tr>
+              <th>ФИО</th>
+              <th>Деж</th>
+              <th>Рез</th>
+              <th>Отп</th>
+              <th>Бол</th>
+              <th>Ком</th>
+              <th style="background-color: lightpink; color: white">Деж<br><i>(в.д.)</i></th>
+              <th style="background-color: lightpink; color: white">Рез<br><i>(в.д.)</i></th>
+              <th style="background-color: lightpink; color: white">Отп<br><i>(в.д.)</i></th>
+              <th style="background-color: lightpink; color: white">Бол<br><i>(в.д.)</i></th>
+              <th style="background-color: lightpink; color: white">Ком<br><i>(в.д.)</i></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in scheduleData.data">
+              <td>{{item.name}}</td>
+              <td>{{item.countsOfDuty.DUTY}}</td>
+              <td>{{item.countsOfDuty.RESERVE}}</td>
+              <td>{{item.countsOfDuty.VACATION}}</td>
+              <td>{{item.countsOfDuty.DISEASE}}</td>
+              <td>{{item.countsOfDuty.BUSINESS_TRIP}}</td>
+              <td style="background-color: lightpink; color: white">{{item.countsOfDuty.HOLIDAYS_DUTY}}</td>
+              <td style="background-color: lightpink; color: white">{{item.countsOfDuty.HOLIDAYS_RESERVE}}</td>
+              <td style="background-color: lightpink; color: white">{{item.countsOfDuty.HOLIDAYS_VACATION}}</td>
+              <td style="background-color: lightpink; color: white">{{item.countsOfDuty.HOLIDAYS_DISEASE}}</td>
+              <td style="background-color: lightpink; color: white">{{item.countsOfDuty.HOLIDAYS_BUSINESS_TRIP}}</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -38,7 +76,8 @@
               DISEASE: 'Б',
               BUSINESS_TRIP: 'K'
             },
-            holidaysInMonth: '4'
+            holidaysInMonth: '4',
+            isTablesShow: false
         }
       },
       methods: {
@@ -46,11 +85,18 @@
            * Initialize schedule table
            */
           initTable() {
+              // window.$pdfDoc.text('Hello world!', 10, 10);
+              // window.$pdfDoc.save('hw.pdf')
+
+
               let persons = this.inputData.persons.replace(/\s+/g, '').split(',');
+
               this.scheduleData = this.getData(persons, this.inputData.year, this.inputData.month);
+
               this.setStatusesInTable(persons);
-              console.log('data', this.scheduleData);
-              // this.getDutyCountOfPersons(this.inputData.year, this.inputData.month);
+
+              this.setDutyCountOfPersons();
+              this.isTablesShow = true;
           },
 
           /**
@@ -62,14 +108,25 @@
             if (persons.length > 0 && persons[0] !== '') {
               let count = 1;
               for (let i = 1; i < this.scheduleData.countDaysOfDate + 1; i++) {
-                me.scheduleData.data.forEach(val => {
-                  if (count <= me.scheduleData.countDaysOfDate) {
-                    val[count.toString()] = me.status.DUTY;
-                    val[(count + 1).toString()] = me.status.RESERVE;
-                    count++;
-                  }
-                })
+
+
+                  // console.log('persons', me.scheduleData.data)
+
+
+                  me.scheduleData.data.forEach(val => {
+                    if (count <= me.scheduleData.countDaysOfDate) {
+                      val[count.toString()] = me.status.DUTY;
+                      val[(count + 1).toString()] = me.status.RESERVE;
+                      count++;
+                    }
+                  })
+
+
+
               }
+
+              console.log('data', me.scheduleData.data)
+
             }
           },
 
@@ -98,12 +155,12 @@
                   response.data.push(dataValue);
               });
               for (let i = 1; i <= count; i++) {
-                let countDay = new Date(year, month, i - 1).getDay();
+                let countDay = new Date(year, month-1, i).getDay();
                 let fieldsValue = {};
                 fieldsValue['key'] = i.toString();
                 fieldsValue['label'] = i.toString();
-                if (countDay === 5) fieldsValue['variant'] = 'secondary';
                 if (countDay === 6) fieldsValue['variant'] = 'secondary';
+                if (countDay === 0) fieldsValue['variant'] = 'secondary';
                 let holidays = me.holidaysInMonth.replace(/\s+/g, '').split(',');
                 holidays.forEach(holiday => {if (fieldsValue['key'] === holiday.toString()) fieldsValue['variant'] = 'danger'});
                 response.fields.push(fieldsValue);
@@ -111,33 +168,57 @@
               return response;
           },
 
-        //do not work, need refactoring....
-          getDutyCountOfPersons(year, month) {
+          /**
+           * Set duty statuses
+           */
+          setDutyCountOfPersons() {
             let me = this;
-            let countOfHolidays = 0;
-            // for (let i = 0; i < this.scheduleData.countDaysOfDate; i++) {
-            //   let countDay = new Date(year, month, i).getDay();
-              this.scheduleData.data.forEach((person,i,arr) => {
-
-                console.log(person.name)
-                console.log('as',person['2'])
-                for (let j = 1; j <= me.scheduleData.countDaysOfDate; j++) {
-                  Object.keys(person).forEach(val => {
-                    console.log(val)
-                    if (val === '5' && person.val === 'Х' || val === '6' && person.val === 'Х'){
-                      countOfHolidays++
+            this.scheduleData.data.forEach((person, index, array) => {
+                let countOfDuty = 0;
+                let countOfReserve = 0;
+                let countOfVacation = 0;
+                let countOfDisease = 0;
+                let countOfBusinessTrip = 0;
+                let countOfDutyAtHolidays = 0;
+                let countOfReserveAtHolidays = 0;
+                let countOfVacationAtHolidays = 0;
+                let countOfDiseaseAtHolidays = 0;
+                let countOfBusinessTripAtHolidays = 0;
+                Object.keys(person).forEach(val => {
+                    if (person[val] === me.status.DUTY) {
+                        if (me.scheduleData.fields[val] && me.scheduleData.fields[val].hasOwnProperty('variant')) countOfDutyAtHolidays++;
+                        countOfDuty++;
                     }
-                  })
-                  // if (person[(j).toString()] === '5' || person[(j).toString()] === '6') {
-                  //   countOfHolidays++
-                  // }
-                }
-
-
-
-              })
-            // }
-            console.log('count days', countOfHolidays)
+                    if (person[val] === me.status.RESERVE) {
+                        if (me.scheduleData.fields[val] && me.scheduleData.fields[val].hasOwnProperty('variant')) countOfReserveAtHolidays++;
+                        countOfReserve++;
+                    }
+                    if (person[val] === me.status.VACATION) {
+                        if (me.scheduleData.fields[val] && me.scheduleData.fields[val].hasOwnProperty('variant')) countOfVacationAtHolidays++;
+                        countOfVacation++;
+                    }
+                    if (person[val] === me.status.DISEASE) {
+                        if (me.scheduleData.fields[val] && me.scheduleData.fields[val].hasOwnProperty('variant')) countOfDiseaseAtHolidays++;
+                        countOfDisease++;
+                    }
+                    if (person[val] === me.status.BUSINESS_TRIP) {
+                        if (me.scheduleData.fields[val] && me.scheduleData.fields[val].hasOwnProperty('variant')) countOfBusinessTripAtHolidays++;
+                        countOfBusinessTrip++;
+                    }
+                });
+                person.countsOfDuty = {
+                    DUTY: countOfDuty,
+                    RESERVE: countOfReserve,
+                    VACATION: countOfVacation,
+                    DISEASE: countOfDisease,
+                    BUSINESS_TRIP: countOfBusinessTrip,
+                    HOLIDAYS_DUTY: countOfDutyAtHolidays,
+                    HOLIDAYS_RESERVE: countOfReserveAtHolidays,
+                    HOLIDAYS_VACATION: countOfVacationAtHolidays,
+                    HOLIDAYS_DISEASE: countOfDiseaseAtHolidays,
+                    HOLIDAYS_BUSINESS_TRIP: countOfBusinessTripAtHolidays,
+                };
+            })
           }
       }
   }
