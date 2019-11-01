@@ -2,12 +2,14 @@
   <div>
     <h1>{{ msg }}</h1>
     <Scheduler/>
+    <SchedulerCustom/>
     <About/>
   </div>
 </template>
 
 <script>
   import Scheduler from './components/Scheduler.vue'
+  import SchedulerCustom from "./components/SchedulerCustom.vue";
   import About from './components/About.vue'
 
   export default {
@@ -17,7 +19,7 @@
       }
     },
     components: {
-      Scheduler, About
+      Scheduler, SchedulerCustom, About
     }
   }
 </script>

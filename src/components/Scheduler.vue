@@ -53,6 +53,8 @@
   </div>
 </template>
 <script>
+  import jsPDF from 'jspdf'
+
   export default {
       name: 'Scheduler',
       data () {
@@ -66,7 +68,7 @@
             inputData: {
                 year: new Date().getFullYear(),
                 month: new Date().getMonth() + 1,
-                persons: 'Петров, Иванов, Валентинов'
+                persons: 'Петров, Иванов, Валентинов, Кучин, Малышев'
                 // persons: ''
             },
             status: {
@@ -85,10 +87,6 @@
            * Initialize schedule table
            */
           initTable() {
-              // window.$pdfDoc.text('Hello world!', 10, 10);
-              // window.$pdfDoc.save('hw.pdf')
-
-
               let persons = this.inputData.persons.replace(/\s+/g, '').split(',');
 
               this.scheduleData = this.getData(persons, this.inputData.year, this.inputData.month);
@@ -97,6 +95,17 @@
 
               this.setDutyCountOfPersons();
               this.isTablesShow = true;
+          },
+
+          /**
+           * Save text as pdf
+           * @param text - text or html to save a file.pdf
+           * @param name - name file
+           */
+          savePdf(text, name) {
+              let pdf = new jsPDF();
+              pdf.text(text);
+              pdf.save(name);
           },
 
           /**

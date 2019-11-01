@@ -11,11 +11,13 @@ Vue.use(VueRouter)
 Vue.use(BootstrapVue)
 
 import Scheduler from './components/Scheduler.vue'
+import SchedulerCustom from './components/SchedulerCustom.vue'
 import About from './components/About.vue'
 
 const router = new VueRouter({
   routes: [
     { path: '/', component: Scheduler },
+    { path: '/scheduler', component: SchedulerCustom },
     { path: '/about', component: About }
   ]
 })

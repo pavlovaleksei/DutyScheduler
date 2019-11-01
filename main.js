@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === 'development') {
 let mainWindow
 
 function createWindow () {
+  // process.prototype.txtx = 'sdasd'
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1024,
