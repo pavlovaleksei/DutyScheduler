@@ -6,6 +6,15 @@
     <b-form-input type="number" min="1" max="12" v-model="inputData.month"/>
     <b-form-textarea v-model="inputData.persons" placeholder="Иванов, Петров, Сидоров" rows="1" max-rows="3"></b-form-textarea>
     <b-form-input v-model="holidaysInMonth" placeholder="1,2,3"/>
+
+    Первое дежурство в графике:
+    <select v-model="firstDutyInMonth">
+      <option disabled value="">Выберите сотрудника</option>
+      <option v-for="item in getPersonsArray()">{{item}}</option>
+    </select>
+     <i v-if="firstDutyInMonth.length !== 0">Выбрано: {{firstDutyInMonth}}</i>
+
+
     <div  style="text-align: center">
       <b-button v-on:click="initTable">Сформировать</b-button>
     </div>
@@ -68,7 +77,7 @@
             inputData: {
                 year: new Date().getFullYear(),
                 month: new Date().getMonth() + 1,
-                persons: 'Петров, Иванов, Валентинов, Кучин, Малышев'
+                persons: 'Волков, Павлова, Ведерников, Левкина, Баша'
                 // persons: ''
             },
             status: {
@@ -79,20 +88,53 @@
               BUSINESS_TRIP: 'K'
             },
             holidaysInMonth: '4',
-            isTablesShow: false
+            isTablesShow: false,
+            firstDutyInMonth: ''
         }
       },
       methods: {
+
+          /**
+           * Get array of persons in hot
+           * @return - array of persons in view
+           */
+          getPersonsArray() {
+              return this.inputData.persons.replace(/\s+/g, '').split(',');
+          },
+
           /**
            * Initialize schedule table
            */
           initTable() {
               let persons = this.inputData.persons.replace(/\s+/g, '').split(',');
+              let personsCustomStatuses = [
+                {
+                  status: this.status.DEFAULT,
+                  date: []
+                },
+                {
+                  status: this.status.DISEASE,
+                  date: [5,6,7]
+                },
+                {
+                  status: this.status.DEFAULT,
+                  date: []
+                },
+                {
+                  status: this.status.DEFAULT,
+                  date: []
+                },
+                {
+                  status: this.status.DEFAULT,
+                  date: []
+                }
+              ]
 
-              this.scheduleData = this.getData(persons, this.inputData.year, this.inputData.month);
+              this.scheduleData = this.getData(persons, personsCustomStatuses, this.inputData.year, this.inputData.month);
+
+              console.log('data', this.scheduleData)
 
               this.setStatusesInTable(persons);
-
               this.setDutyCountOfPersons();
               this.isTablesShow = true;
           },
@@ -116,27 +158,32 @@
             let me = this;
             if (persons.length > 0 && persons[0] !== '') {
               let count = 1;
-              for (let i = 1; i < this.scheduleData.countDaysOfDate + 1; i++) {
-
-
-                  // console.log('persons', me.scheduleData.data)
-
-
-                  me.scheduleData.data.forEach(val => {
+              let selectedPersonNumber = 0;
+              me.scheduleData.data.forEach((p, index, array) => {if (p.name === me.firstDutyInMonth) selectedPersonNumber = index});
+              for (let i = 0; i < this.scheduleData.countDaysOfDate; i++) {
+                  me.scheduleData.data.forEach((val, indexVal, arr) => {
                     if (count <= me.scheduleData.countDaysOfDate) {
-                      val[count.toString()] = me.status.DUTY;
-                      val[(count + 1).toString()] = me.status.RESERVE;
+
+
+                      if (indexVal < selectedPersonNumber) val = me.setStatusesInTableByPerson(val, count + me.scheduleData.data.length - selectedPersonNumber);
+                      if (indexVal >= selectedPersonNumber) val = me.setStatusesInTableByPerson(val, count - selectedPersonNumber);
                       count++;
                     }
                   })
-
-
-
               }
-
-              console.log('data', me.scheduleData.data)
-
             }
+          },
+
+          /**
+           * Set status in schedule table by person
+           * @param person - Person to want set status
+           * @param index - Count day to set first status
+           * @return - Person with hes status
+           */
+          setStatusesInTableByPerson(person, index) {
+            person[(index).toString()] = this.status.DUTY;
+            person[(index + 1).toString()] = this.status.RESERVE;
+            return person;
           },
 
           /**
@@ -147,7 +194,10 @@
            * @param month - searchable month
            * @return {{data: [], fields: [], countDaysOfDate: number}}
            */
-          getData(names, year, month) {
+          getData(names, personStatusesCustom, year, month) {
+
+            console.log('personStatusesCustom', personStatusesCustom)
+
               let me = this;
               let count = new Date(year, month, 0).getDate();
               let response = { data: [], fields: [], countDaysOfDate: count };
@@ -155,11 +205,12 @@
               fieldsValue['key'] = 'name';
               fieldsValue['label'] = 'Фамилия';
               response.fields.push(fieldsValue);
-              names.forEach(person => {
+              names.forEach((person,i,arr) => {
                   let dataValue = {};
                   dataValue['name'] = person;
+                  dataValue['info'] = personStatusesCustom[i]
                   for (let i = 1; i <= count; i++) {
-                      dataValue[i.toString()] = '';
+                      dataValue[i.toString()] = me.status.DEFAULT;
                   }
                   response.data.push(dataValue);
               });

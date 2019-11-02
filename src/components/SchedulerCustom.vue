@@ -12,16 +12,21 @@
 
     <button v-on:click="addPerson">Добавить</button>
     <input v-model="personsNew.name">
-    <input type="checkbox" v-model="personsNew.isFirst">
+    <select v-model="personsNew.status">
+      <option disabled value="">Выберите статус</option>
+      <option>{{status.DEFAULT}}</option>
+      <option>{{status.VACATION}}</option>
+      <option>{{status.DISEASE}}</option>
+      <option>{{status.BUSINESS_TRIP}}</option>
+    </select>
 
-    <div v-for="item in resPers">
-      Имя: {{item.name}}
-      Первый: {{item.isFirst}}
+    <div v-for="item, i in resPers">
+      Имя: {{item.name}} Статус: {{item.status}}
     </div>
 
 
 
-    <b-form-textarea v-model="inputData.persons" placeholder="Иванов, Петров, Сидоров" rows="1" max-rows="3"></b-form-textarea>
+<!--    <b-form-textarea v-model="inputData.persons" placeholder="Иванов, Петров, Сидоров" rows="1" max-rows="3"></b-form-textarea>-->
 
     <div  style="text-align: center">
       <b-button v-on:click="initTable">Сформировать</b-button>
@@ -89,6 +94,7 @@
                     // persons: ''
                 },
                 status: {
+                    DEFAULT: '',
                     DUTY: 'Х',
                     RESERVE: 'Р',
                     VACATION: 'О',
@@ -100,6 +106,7 @@
                 listToDo: [1],
                 personsNew: {
                     name: '',
+                    status: '',
                     isFirst: false
                 },
                 resPers: []
@@ -124,13 +131,17 @@
 
             addPerson(v1, v2, v3) {
                 console.log('personsNew', this.personsNew)
-                this.resPers.push({name: this.personsNew.name, isFirst: this.personsNew.isFirst})
+
+              let countIsFirst = 0;
+              this.resPers.forEach(v => {
+                console.log('v', v)
+                if (v.isFirst === true) countIsFirst++
+              });
+              if (countIsFirst > 0) console.error('isFirst was be added')
+
+                this.resPers.push({name: this.personsNew.name, status: this.personsNew.status});
                 this.personsNew = {name: '', isFirst: false}
                 console.log('resPers', this.resPers)
-
-                console.log('this.listToDo.length1', this.listToDo.length)
-                this.listToDo.length++
-                console.log('this.listToDo.length2', this.listToDo.length);
             },
 
             /**
